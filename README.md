@@ -1,4 +1,4 @@
-![URL Shortener Logo](https://i.ibb.co/vhqhf7f/DALL-E-2023-10-20-14-25-21-Illustration-with-a-yellow-background-showing-a-digital-hand-pressing-a-S.png)
+![URL Shortener Logo](./imagen.png)
 
 # Servicio de Acortador de URL
 
