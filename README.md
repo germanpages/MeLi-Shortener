@@ -18,14 +18,6 @@
   - [Acortar URL](#acortar-url)
   - [Recuperar URL](#recuperar-url)
   - [Eliminar URL](#eliminar-url)
-- [Escalabilidad y Rendimiento](#escalabilidad-y-rendimiento)
-  - [DynamoDB](#dynamodb)
-  - [AWS Lambda](#aws-lambda)
-  - [Caché](#caché-1)
-- [Observabilidad](#observabilidad-1)
-  - [Monitoreo y Alertas](#monitoreo-y-alertas)
-  - [Registros](#registros)
-- [Puntos de Validación](#puntos-de-validación)
 
 ## Arquitectura y Tecnologías
 
