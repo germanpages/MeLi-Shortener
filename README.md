@@ -2,7 +2,7 @@
 
 # Servicio de Acortador de URL
 
-![Go Version](https://img.shields.io/badge/Go-1.17-blue)
+![Go Version](https://img.shields.io/badge/Go-1.21-blue)
 ![AWS DynamoDB](https://img.shields.io/badge/AWS-DynamoDB-orange)
 ![AWS Lambda](https://img.shields.io/badge/AWS-Lambda-green)
 ![AWS ElastiCache](https://img.shields.io/badge/AWS-ElastiCache-red)
