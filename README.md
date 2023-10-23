@@ -1,4 +1,4 @@
-![URL Shortener Logo](./imagen.png)
+![URL Shortener Logo](./public/img/logo.png)
 
 # Servicio de Acortador de URL
 
@@ -18,7 +18,8 @@
   - [Acortar URL](#acortar-url)
   - [Recuperar URL](#recuperar-url)
   - [Eliminar URL](#eliminar-url)
-
+- [Manual de pruebas](#manual-de-pruebas)
+  - [Acortar URL](#acortar-url)
 ## Arquitectura y Tecnologías
 
 ### Base de Datos
@@ -43,3 +44,15 @@ Al recibir una URL acortada, el sistema primero verifica la caché. Si no se enc
 
 ### Eliminar URL
 Eliminar una URL acortada es sencillo: simplemente se elimina el registro correspondiente en DynamoDB.
+
+## Manual de pruebas
+
+### Descargar el repositorio
+git clone https://github.com/germanpages/MeLi-Shortener.git
+
+### Ejecutar
+go run src/main.go
+
+### Uso de la api
+En https://editor.swagger.io/ puede colocar nuestro openapi.yaml y ver la especificación.
+![OpenApi](./public/img/openapi.png)

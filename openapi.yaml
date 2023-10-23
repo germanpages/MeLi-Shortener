@@ -1,0 +1,46 @@
+openapi: "3.0.0"
+info:
+  title: "URL Shortener API"
+  version: "1.0.0"
+
+paths:
+  /create:
+    get:
+      summary: "Create a short URL"
+      parameters:
+        - name: url
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+      responses:
+        '200':
+          description: "Short URL created successfully"
+          content:
+            text/plain:
+              example: "Short URL: http://localhost:8080/XXXXXX\n"
+        '400':
+          description: "Missing URL parameter"
+          content:
+            text/plain:
+              example: "Missing URL parameter"
+
+  /{shortURL}:
+    get:
+      summary: "Redirect to the original URL"
+      parameters:
+        - name: shortURL
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: "Found and redirecting"
+        '404':
+          description: "Short URL not found"
+          content:
+            text/plain:
+              example: "Short URL not found"
+
