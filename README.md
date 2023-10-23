@@ -19,7 +19,9 @@
   - [Recuperar URL](#recuperar-url)
   - [Eliminar URL](#eliminar-url)
 - [Manual de pruebas](#manual-de-pruebas)
-  - [Acortar URL](#acortar-url)
+  - [Descargar el repositorio](#descargar-el-repositorio)
+  - [Ejecutar](#ejecutar)
+  - [Uso de la api](#uso-de-la-api)
 ## Arquitectura y Tecnologías
 
 ### Base de Datos
@@ -48,11 +50,13 @@ Eliminar una URL acortada es sencillo: simplemente se elimina el registro corres
 ## Manual de pruebas
 
 ### Descargar el repositorio
+```
 git clone https://github.com/germanpages/MeLi-Shortener.git
-
+```
 ### Ejecutar
+```
 go run src/main.go
-
+```
 ### Uso de la api
 En https://editor.swagger.io/ puede colocar nuestro openapi.yaml y ver la especificación.
 ![OpenApi](./public/img/openapi.png)
