@@ -1,8 +1,20 @@
-service: template-go-api
+service: url-shortener
+
+plugins:
+  - serverless-go-build
+  - serverless-scriptable-plugin
+
+custom:
+  script:
+    hooks:
+      'before:package:createDeploymentArtifacts':
+        - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/main src/main.go
 
 provider:
   name: aws
   runtime: go1.x
+  region: us-east-1
+  role: arn:aws:iam::312953117411:role/Shortener
 
 package:
   patterns:
