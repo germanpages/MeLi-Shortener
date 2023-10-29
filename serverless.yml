@@ -40,14 +40,25 @@ resources:
               ProjectionType: ALL
 
 package:
-  patterns:
-    - '!./**'
-    - ./bin/**
+  include:
+    - bin/**
+  exclude:
+    - ./**
+    - node_modules/**
+    - .serverless/**
+    - .git/**
+
 
 functions:
-  main:
-    handler: bin/main
+  urlHandler:
+    handler: main
     events:
-      - httpApi:
-          path: /main
+      - http:
+          path: create
+          method: post
+      - http:
+          path: resolve/{shortURL}
           method: get
+      - http:
+          path: delete
+          method: delete
