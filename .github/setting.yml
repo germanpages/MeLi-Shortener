@@ -1,0 +1,48 @@
+# Configuración de los settings del repositorio
+repository:
+  name: MeLi-Shortener
+  description: "Servicio de Acortador de URL para MercadoLibre"
+  topics:
+    - url-shortener
+    - golang
+    - aws
+    - serverless
+  private: false
+  has_issues: true
+  has_projects: true
+  has_wiki: false
+
+branches:
+  - name: main
+    protection:
+      required_pull_request_reviews:
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: true
+      required_status_checks:
+        strict: true
+        contexts:
+          - validate
+          - deploy-to-testing
+
+labels:
+  - name: bug
+    color: d73a4a
+    description: "Algo no está funcionando como debería"
+  - name: feature
+    color: 0e8a16
+    description: "Nueva solicitud de característica o idea"
+  - name: Proveedores Externos
+    color: c5def5
+    description: "Tareas o issues relacionados con proveedores externos"
+  - name: Meli
+    color: fef2c0
+    description: "Tareas o issues específicos de MercadoLibre"
+
+collaborators:
+  - username: germanpages
+    permission: admin
+
+code_owners:
+  - path: "*"
+    owners:
+      - "@germanpages"

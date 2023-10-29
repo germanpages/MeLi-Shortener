@@ -1,18 +1,65 @@
-service: template-go-api
+service: url-shortener
+
+plugins:
+  - serverless-go-build
+  - serverless-scriptable-plugin
+
+custom:
+  script:
+    hooks:
+      'before:package:createDeploymentArtifacts':
+        - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/main src/main.go
 
 provider:
   name: aws
   runtime: go1.x
+  region: us-east-1
+  role: arn:aws:iam::312953117411:role/Shortener
+  environment:
+    BASE_URL: https://me.li
+resources:
+  Resources:
+    UrlShortener:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UrlShortener
+        AttributeDefinitions:
+          - AttributeName: shortUrl
+            AttributeType: S
+          - AttributeName: longUrl
+            AttributeType: S
+        KeySchema:
+          - AttributeName: shortUrl
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: LongUrlIndex
+            KeySchema:
+              - AttributeName: longUrl
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
 
 package:
-  patterns:
-    - '!./**'
-    - ./bin/**
+  include:
+    - bin/**
+  exclude:
+    - ./**
+    - node_modules/**
+    - .serverless/**
+    - .git/**
+
 
 functions:
-  main:
-    handler: bin/main
+  urlHandler:
+    handler: main
     events:
-      - httpApi:
-          path: /main
+      - http:
+          path: create
+          method: post
+      - http:
+          path: resolve/{shortURL}
           method: get
+      - http:
+          path: delete
+          method: delete

@@ -16,3 +16,6 @@ bin
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# Test environment file
+test.go
