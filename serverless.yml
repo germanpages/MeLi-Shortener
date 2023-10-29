@@ -15,7 +15,8 @@ provider:
   runtime: go1.x
   region: us-east-1
   role: arn:aws:iam::312953117411:role/Shortener
-
+  environment:
+    BASE_URL: https://me.li
 resources:
   Resources:
     UrlShortener:
