@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -47,6 +48,32 @@ func createShortURL(request events.APIGatewayProxyRequest) (events.APIGatewayPro
 	if longURL == "" {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "Missing URL parameter"}, nil
 	}
+	queryInput := &dynamodb.QueryInput{
+		TableName: aws.String("UrlShortener"),
+		IndexName: aws.String("LongUrlIndex"),
+		KeyConditions: map[string]*dynamodb.Condition{
+			"longUrl": {
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{
+					{
+						S: aws.String(longURL),
+					},
+				},
+			},
+		},
+	}
+	queryOutput, err := db.Query(queryInput)
+	if err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Internal Server Error"}, err
+	}
+	if len(queryOutput.Items) > 0 {
+		existingShortURL := *queryOutput.Items[0]["shortUrl"].S
+		baseURL := os.Getenv("BASE_URL")
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusOK,
+			Body:       fmt.Sprintf("Short URL: %s/%s\n", baseURL, existingShortURL),
+		}, nil
+	}
 	shortURL := generateShortURL()
 	item := map[string]*dynamodb.AttributeValue{
 		"shortUrl": {
@@ -60,7 +87,7 @@ func createShortURL(request events.APIGatewayProxyRequest) (events.APIGatewayPro
 		TableName: aws.String("UrlShortener"),
 		Item:      item,
 	}
-	_, err := db.PutItem(input)
+	_, err = db.PutItem(input)
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Internal Server Error - Cant Write"}, err
 	}
@@ -102,11 +129,13 @@ func resolveURL(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRe
 }
 
 func deleteURL(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	shortURL := request.QueryStringParameters["shortURL"]
-	if shortURL == "" {
+	rawShortURL := request.QueryStringParameters["shortURL"]
+	if rawShortURL == "" {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "Missing shortURL parameter"}, nil
 	}
 
+	segments := strings.Split(rawShortURL, "/")
+	shortURL := segments[len(segments)-1]
 	input := &dynamodb.DeleteItemInput{
 		TableName: aws.String("UrlShortener"),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -141,7 +170,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			return resolveURL(request)
 		}
 	case http.MethodDelete:
-		if request.Resource == "/delete/" {
+		if request.Resource == "/delete" {
 			return deleteURL(request)
 		}
 	default:

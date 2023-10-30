@@ -26,15 +26,15 @@ El archivo `settings.yml` en la raíz del repositorio se utiliza para definir co
 
 Se puede encontrar más detalles sobre las configuraciones disponibles y cómo se aplican en el documento [Configuración de settings.yml](./path-to-your/settings-yml-documentation).
 
-# GitHub Actions
+## GitHub Actions
 
 Se definen dos workflows en GitHub Actions, los cuales serán implementados en fases posteriores del proyecto:
 
-## Validate Workflow
+### Validate Workflow
 
 - **Test de Integración:** Verifica que el código integrado funcione correctamente.
 - **Estilo de Código:** Comprueba que el estilo del código sea el adecuado.
 
-## Deploy to Testing Workflow
+### Deploy to Testing Workflow
 
 - **Serverless Framework:** Ejecuta el serverless framework que despliega tanto la infraestructura como el código en la cuenta de AWS.

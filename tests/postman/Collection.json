@@ -1,0 +1,113 @@
+{
+	"info": {
+		"_postman_id": "1e1df012-7509-4437-bc37-dfb212044f7b",
+		"name": "Shortener",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16556743",
+		"_collection_link": "https://dark-sunset-209748.postman.co/workspace/germanpages64~748570df-dcb1-4fd1-ac21-ba1b91a47349/collection/16556743-1e1df012-7509-4437-bc37-dfb212044f7b?action=share&source=collection_link&creator=16556743"
+	},
+	"item": [
+		{
+			"name": "Create shortURL",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{URL_LAMBDA}}/{{Environment}}/create?url=https://eletronicos.mercadolivre.com.br/seguranca-casa/%23menu=categories",
+					"host": [
+						"{{URL_LAMBDA}}"
+					],
+					"path": [
+						"{{Environment}}",
+						"create"
+					],
+					"query": [
+						{
+							"key": "url",
+							"value": "https://eletronicos.mercadolivre.com.br/seguranca-casa/%23menu=categories"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete shortURL",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{URL_LAMBDA}}/{{Environment}}/delete?shortURL=https://me.li/{{URL_CODE}}",
+					"host": [
+						"{{URL_LAMBDA}}"
+					],
+					"path": [
+						"{{Environment}}",
+						"delete"
+					],
+					"query": [
+						{
+							"key": "shortURL",
+							"value": "https://me.li/{{URL_CODE}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Resolve shortURLcode",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL_LAMBDA}}/{{Environment}}/resolve/{{URL_CODE}}",
+					"host": [
+						"{{URL_LAMBDA}}"
+					],
+					"path": [
+						"{{Environment}}",
+						"resolve",
+						"{{URL_CODE}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "URL_CODE",
+			"value": "5OmrOJ"
+		},
+		{
+			"key": "URL_LAMBDA",
+			"value": "https://mfek0j9aed.execute-api.us-east-1.amazonaws.com",
+			"type": "string"
+		},
+		{
+			"key": "Environment",
+			"value": "testing"
+		}
+	]
+}
