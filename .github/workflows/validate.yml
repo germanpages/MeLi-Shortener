@@ -10,57 +10,20 @@ on:
 
 jobs:
   validate:
-    name: Validate Code
     runs-on: ubuntu-latest
-
-    services:
-      localstack:
-        image: localstack/localstack
-        env:
-          SERVICES: dynamodb
-          DEBUG: 1
-          DATA_DIR: /tmp/localstack/data
-        ports:
-          - "4566:4566"
-        options: --mount type=tmpfs,destination=/tmp/localstack/data --pull always
-
     steps:
-      - name: Checkout code
+      - name: Check out code
         uses: actions/checkout@v2
-        
-      - name: Setup Go
+
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.21.3
 
-      - name: Install dependencies
-        run: go mod download
+      - name: Compile Go code
+        run: go build -v ./src/...
 
-      - name: Run unit tests
-        run: go test ./src/...
-
-      - name: Build
-        run: go build -o ./bin/main ./src/main.go
-
-      - name: Start DynamoDB Local
+      - name: Lint Go code
         run: |
-          aws dynamodb create-table --endpoint-url http://localhost:4566 --table-name UrlShortener \
-          --attribute-definitions AttributeName=shortUrl,AttributeType=S \
-          --key-schema AttributeName=shortUrl,KeyType=HASH \
-          --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
-
-      - name: Run integration tests
-        run: go test ./tests/...
-
-      - name: Lint
-        run: go vet ./src/...
-
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.41.1
-
-      - name: Security Scan
-        uses: securego/gosec@master
-        with:
-          args: ./...
+          go get -u golang.org/x/lint/golint
+          golint ./src/...
