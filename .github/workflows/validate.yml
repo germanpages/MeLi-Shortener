@@ -10,13 +10,15 @@ jobs:
         name: Validate Code
         runs-on: ubuntu-latest
         services:
-            localstack:
-                image: localstack/localstack
-                env:
-                    SERVICES: dynamodb
-                    DEFAULT_REGION: us-east-1
-                ports:
-                    - "4566:4566"
+          localstack:
+            image: localstack/localstack
+            env:
+              SERVICES: dynamodb
+              DEBUG: 1
+              DATA_DIR: /tmp/localstack/data
+            ports:
+              - "4566:4566"
+            options: --mount type=tmpfs,destination=/tmp/localstack/data --pull always
 
 
 
