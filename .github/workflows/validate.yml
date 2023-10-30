@@ -3,56 +3,64 @@ name: Validate
 on:
   push:
     branches:
-      - testing
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-    validate:
-        name: Validate Code
-        runs-on: ubuntu-latest
-        services:
-          localstack:
-            image: localstack/localstack
-            env:
-              SERVICES: dynamodb
-              DEBUG: 1
-              DATA_DIR: /tmp/localstack/data
-            ports:
-              - "4566:4566"
-            options: --mount type=tmpfs,destination=/tmp/localstack/data --pull always
+  validate:
+    name: Validate Code
+    runs-on: ubuntu-latest
 
+    services:
+      localstack:
+        image: localstack/localstack
+        env:
+          SERVICES: dynamodb
+          DEBUG: 1
+          DATA_DIR: /tmp/localstack/data
+        ports:
+          - "4566:4566"
+        options: --mount type=tmpfs,destination=/tmp/localstack/data --pull always
 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.21.3
 
-    build:
-        name: Build and Test
-        runs-on: ubuntu-latest
+      - name: Install dependencies
+        run: go mod download
 
-        steps:
-        - name: Checkout code
-          uses: actions/checkout@v2
+      - name: Run unit tests
+        run: go test ./src/...
 
-        - name: Set up Go
-          uses: actions/setup-go@v2
-          with:
-            go-version: 1.21.3
+      - name: Build
+        run: go build -o ./bin/main ./src/main.go
 
-        - name: Build
-          run: go build -v ./src
+      - name: Start DynamoDB Local
+        run: |
+          aws dynamodb create-table --endpoint-url http://localhost:4566 --table-name UrlShortener \
+          --attribute-definitions AttributeName=shortUrl,AttributeType=S \
+          --key-schema AttributeName=shortUrl,KeyType=HASH \
+          --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 
-        - name: Run Unit Tests
-          run: go test -v ./src
+      - name: Run integration tests
+        run: go test ./tests/...
 
-        - name: Run Go Lint
-          run: |
-            go install golang.org/x/lint/golint@latest
-            golint ./src...
+      - name: Lint
+        run: go vet ./src/...
 
-        - name: Run Go Vet
-          run: go vet ./src...
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.41.1
 
-        - name: Run Go FMT
-          run: |
-            if [[ -n "$(gofmt -l ./src)" ]]; then
-                echo "Go code is not properly formatted:"
-                gofmt -d ./src
-                exit 1
-            fi
+      - name: Security Scan
+        uses: securego/gosec@master
+        with:
+          args: ./...
