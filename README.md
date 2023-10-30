@@ -18,6 +18,7 @@
   - [Acortar URL](#acortar-url)
   - [Recuperar URL](#recuperar-url)
   - [Eliminar URL](#eliminar-url)
+  - [Arquitectura AWS](#arquitecturaaws)
 - [Manual de pruebas](#manual-de-pruebas)
   - [Descargar el repositorio](#descargar-el-repositorio)
   - [Ejecutar](#ejecutar)
@@ -57,6 +58,10 @@ Al recibir una URL acortada, el sistema primero verifica la caché. Si no se enc
 ### `Eliminar URL`
 
 Eliminar una URL acortada es sencillo: simplemente se elimina el registro correspondiente en DynamoDB.
+
+### `Arquitectura AWS`
+
+<img src="./public/img/Flujo-AWS.jpg" width="250" alt="AWS">
 
 ## Manual de pruebas
 
