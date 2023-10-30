@@ -1,46 +1,70 @@
-openapi: "3.0.0"
+openapi: 3.1.0
 info:
-  title: "URL Shortener API"
-  version: "1.0.0"
-
+  title: URL Shortener Service
+  version: 1.0.1
 paths:
   /create:
-    get:
-      summary: "Create a short URL"
+    post:
+      summary: Create a short URL
+      description: Creates a short URL for a given long URL.
       parameters:
-        - name: url
-          in: query
+        - in: query
+          name: url
           required: true
+          description: The long URL to be shortened.
           schema:
             type: string
             format: uri
       responses:
-        '200':
-          description: "Short URL created successfully"
+        200:
+          description: Short URL created successfully
           content:
             text/plain:
-              example: "Short URL: http://localhost:8080/XXXXXX\n"
-        '400':
-          description: "Missing URL parameter"
-          content:
-            text/plain:
-              example: "Missing URL parameter"
-
-  /{shortURL}:
+              schema:
+                type: string
+                example: "Short URL: https://me.li/short"
+        400:
+          description: Missing URL parameter
+        500:
+          description: Internal Server Error
+  /resolve/{shortURL}:
     get:
-      summary: "Redirect to the original URL"
+      summary: Resolve a short URL
+      description: Resolves a short URL to its original long URL and redirects.
       parameters:
-        - name: shortURL
-          in: path
+        - in: path
+          name: shortURL
           required: true
+          description: The short URL to be resolved.
           schema:
             type: string
       responses:
-        '302':
-          description: "Found and redirecting"
-        '404':
-          description: "Short URL not found"
-          content:
-            text/plain:
-              example: "Short URL not found"
-
+        303:
+          description: See Other (Redirect)
+          headers:
+            Location:
+              schema:
+                type: string
+                description: The original long URL.
+        404:
+          description: Short URL not found
+        500:
+          description: Internal Server Error
+  /delete:
+    delete:
+      summary: Delete a short URL
+      description: Deletes a short URL from the database.
+      parameters:
+        - in: query
+          name: shortURL
+          required: true
+          description: The short URL to be deleted.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Short URL deleted successfully
+        400:
+          description: Missing shortURL parameter
+        500:
+          description: Internal Server Error
