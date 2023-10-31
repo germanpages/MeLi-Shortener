@@ -1,0 +1,57 @@
+name: Build, Test and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+    build-test-deploy:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.21.3
+
+      - name: Compile
+        run: |
+          go build -v ./src/...
+
+      - name: Deploy Green Version
+        id: deploy-green
+        run: |
+          OUTPUT=$(serverless deploy --stage green)
+          echo "::set-output name=url::$(echo $OUTPUT | grep -o 'https://[a-zA-Z0-9.-]*\.amazonaws\.com')"
+
+      - name: Install Newman
+        run: |
+          npm install -g newman
+
+      - name: Test Create Short URL with Newman
+        id: test-create
+        run: |
+          newman run tests/postman/Shortener.postman_collection.json \
+            --folder "Create Short URL" \
+            --env-var "URL_LAMBDA=${{ steps.deploy-green.outputs.url }}" \
+            --export-environment tmp.environment.json
+
+      - name: Test Resolve and Delete Short URL with Newman
+        run: |
+          newman run tests/postman/Shortener.postman_collection.json \
+            --folder "Resolve and Delete Short URL" \
+            --environment tmp.environment.json
+
+      - name: Delete Green Version
+        run: |
+          serverless remove --stage green
+
+      - name: Deploy Blue Version
+        run: |
+          serverless deploy --stage testing
