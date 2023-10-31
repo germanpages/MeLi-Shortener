@@ -26,6 +26,11 @@ jobs:
       env:
         GOROOT: /opt/hostedtoolcache/go/1.21.3/x64
 
+    - name: Install Serverless plugins
+      run: |
+        serverless plugin install -n serverless-go-build
+        serverless plugin install -n serverless-scriptable-plugin
+
   deploy_green:
     needs: build
     runs-on: ubuntu-latest
