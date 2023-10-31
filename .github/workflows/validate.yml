@@ -21,7 +21,7 @@ jobs:
           go-version: 1.21.3
 
       - name: Compile Go code
-        run: go build -v ./src/...
+        run: go build -v -o bin/main ./src/main.go
 
       - name: Lint Go code
         run: |
