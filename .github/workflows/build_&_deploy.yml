@@ -13,8 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-
     - name: Checkout code
       uses: actions/checkout@v4
 
@@ -22,14 +20,6 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: 1.21.3
-
-    - name: Install Serverless Framework
-      run: npm install -g serverless
-  
-    - name: Install Serverless plugins
-      run: |
-        serverless plugin install -n serverless-go-build
-        serverless plugin install -n serverless-scriptable-plugin
 
     - name: Build
       run: go build -v -o bin/main ./src/main.go
@@ -44,6 +34,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Install Serverless Framework
+      run: npm install -g serverless
+
+    - name: Install Serverless plugins
+      run: |
+        serverless plugin install -n serverless-go-build
+        serverless plugin install -n serverless-scriptable-plugin
 
     - name: Deploy to Green
       id: deploy_green
@@ -69,6 +67,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Install Serverless Framework
+      run: npm install -g serverless
+
+    - name: Install Serverless plugins
+      run: |
+        serverless plugin install -n serverless-go-build
+        serverless plugin install -n serverless-scriptable-plugin
 
     - name: Deploy to Blue
       run: npx serverless deploy --stage blue
