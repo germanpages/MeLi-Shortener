@@ -13,13 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install Serverless Framework
-      run: npm install -g serverless
 
-    - name: Install Serverless plugins
-      run: |
-          serverless plugin install -n serverless-go-build
-          serverless plugin install -n serverless-scriptable-plugin
 
     - name: Checkout code
       uses: actions/checkout@v4
@@ -28,6 +22,14 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: 1.21.3
+
+    - name: Install Serverless Framework
+      run: npm install -g serverless
+  
+    - name: Install Serverless plugins
+      run: |
+        serverless plugin install -n serverless-go-build
+        serverless plugin install -n serverless-scriptable-plugin
 
     - name: Build
       run: go build -v -o bin/main ./src/main.go
