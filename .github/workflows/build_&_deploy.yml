@@ -1,4 +1,4 @@
-name: Build, Test and Deploy
+name: Build, Test, and Deploy
 
 on:
   push:
@@ -9,49 +9,75 @@ on:
       - main
 
 jobs:
-    build-test-deploy:
-      runs-on: ubuntu-latest
-      steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+  build:
+    runs-on: ubuntu-latest
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.21.3
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Compile
-        run: |
-          go build -v ./src/...
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.21.3
 
-      - name: Deploy Green Version
-        id: deploy-green
-        run: |
-          OUTPUT=$(serverless deploy --stage green)
-          echo "::set-output name=url::$(echo $OUTPUT | grep -o 'https://[a-zA-Z0-9.-]*\.amazonaws\.com')"
+    - name: Build
+      run: go build -v -o bin/main ./src/main.go
+      env:
+        GOROOT: /opt/hostedtoolcache/go/1.21.3/x64
 
-      - name: Install Newman
-        run: |
-          npm install -g newman
+  deploy_green:
+    needs: build
+    runs-on: ubuntu-latest
 
-      - name: Test Create Short URL with Newman
-        id: test-create
-        run: |
-          newman run tests/postman/Shortener.postman_collection.json \
-            --folder "Create Short URL" \
-            --env-var "URL_LAMBDA=${{ steps.deploy-green.outputs.url }}" \
-            --export-environment tmp.environment.json
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Test Resolve and Delete Short URL with Newman
-        run: |
-          newman run tests/postman/Shortener.postman_collection.json \
-            --folder "Resolve and Delete Short URL" \
-            --environment tmp.environment.json
+    - name: Deploy to Green
+      run: npx serverless deploy --stage green
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
 
-      - name: Delete Green Version
-        run: |
-          serverless remove --stage green
+    - name: Set URL_LAMBDA environment variable
+      id: set-var
+      run: |
+        URL_LAMBDA=$(echo "${{ steps.deploy_green.outputs.stdout }}" | grep -o 'https://[^ ]*')
+        echo "URL_LAMBDA=$URL_LAMBDA" >> $GITHUB_ENV
+  test:
+    needs: deploy_green
+    runs-on: ubuntu-latest
 
-      - name: Deploy Blue Version
-        run: |
-          serverless deploy --stage testing
+    steps:
+    - name: Run Newman Tests
+      run: newman run tests/postman/Shortener.postman_collection.json --env-var "URL_LAMBDA=${{ steps.extract_url.outputs.URL_LAMBDA }}"
+
+  deploy_blue:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Deploy to Blue
+      run: npx serverless deploy --stage blue
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+
+  cleanup:
+    if: always()
+    needs: [deploy_green, test, deploy_blue]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Remove Green Deployment
+      run: npx serverless remove --stage green
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
