@@ -35,6 +35,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Build
+      run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/main src/main.go
+
     - name: Install Serverless Framework
       run: npm install -g serverless
 
@@ -67,6 +70,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Build
+      run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/main src/main.go
 
     - name: Install Serverless Framework
       run: npm install -g serverless
