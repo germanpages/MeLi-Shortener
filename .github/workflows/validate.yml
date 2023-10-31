@@ -24,6 +24,7 @@ jobs:
         run: go build -v -o bin/main ./src/main.go
 
       - name: Lint Go code
-        run: |
-          go get -u golang.org/x/lint/golint
-          golint ./src/...
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.41.1
+          working-directory: src
