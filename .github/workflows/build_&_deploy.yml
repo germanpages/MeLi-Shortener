@@ -60,20 +60,25 @@ jobs:
         sam build --use-container
         sam deploy --no-fail-on-empty-changeset --stack-name dynamodb-stack
 
-    - name: Serverless deploy with plugins
+    - name: Install Serverless plugins
+      run: |
+        npx serverless plugin install --name serverless-go-build
+        npx serverless plugin install --name serverless-scriptable-plugin
+
+    - name: Serverless deploy
       uses: serverless/github-action@master
       with:
-        args: -c "serverless plugin install --name serverless-go-build && serverless plugin install --name serverless-scriptable-plugin && serverless deploy --stage green"
+        args: deploy --stage green
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      
+
 
     - name: Run Newman Tests
       run: newman run tests/postman/Shortener.postman_collection.json --env-var "URL_LAMBDA=${{ steps.deploy_green.outputs.url_lambda }}"
 
   deploy_blue:
-    
+
     needs: deploy_green
     runs-on: ubuntu-latest
 
@@ -89,10 +94,15 @@ jobs:
     - name: Build
       run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/main src/main.go
 
-    - name: Serverless deploy with plugins
+    - name: Install Serverless plugins
+      run: |
+        npx serverless plugin install --name serverless-go-build
+        npx serverless plugin install --name serverless-scriptable-plugin
+
+    - name: Serverless deploy
       uses: serverless/github-action@master
       with:
-        args: -c "serverless plugin install --name serverless-go-build && serverless plugin install --name serverless-scriptable-plugin && serverless deploy --stage blue"
+        args: deploy --stage blue
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
