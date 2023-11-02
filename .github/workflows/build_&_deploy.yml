@@ -99,16 +99,10 @@ jobs:
     - name: Build
       run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/main src/main.go
 
-    - name: Install Serverless Framework
-      run: npm install -g serverless
-
-    - name: Install Serverless plugins
-      run: |
-        serverless plugin install -n serverless-go-build
-        serverless plugin install -n serverless-scriptable-plugin
-
-    - name: Deploy to Blue
-      run: npx serverless deploy --stage blue
+    - name: Serverless remove
+      uses: serverless/github-action@master
+      with:
+        args: remove --stage blue
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
@@ -121,17 +115,11 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
-    - name: Install Serverless Framework
-      run: npm install -g serverless
 
-    - name: Install Serverless plugins
-      run: |
-        serverless plugin install -n serverless-go-build
-        serverless plugin install -n serverless-scriptable-plugin
-
-    - name: Remove Green Deployment
-      run: npx serverless remove --stage green
+    - name: Serverless remove
+      uses: serverless/github-action@master
+      with:
+        args: remove --stage green
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
