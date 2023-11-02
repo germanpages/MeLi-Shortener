@@ -41,3 +41,8 @@ functions:
       - http:
           path: delete
           method: delete
+
+outputs:
+  ServiceEndpoint:
+    Description: "API Gateway endpoint URL for Prod environment"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${self:provider.stage}/"

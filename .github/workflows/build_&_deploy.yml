@@ -60,22 +60,27 @@ jobs:
         sam build --use-container
         sam deploy --no-fail-on-empty-changeset --stack-name dynamodb-stack
 
+    - name: Install Serverless
+      run: npm install -g serverless
+
     - name: Install Serverless plugins
       run: |
         npx serverless plugin install --name serverless-go-build
         npx serverless plugin install --name serverless-scriptable-plugin
 
-    - name: Serverless deploy
-      uses: serverless/github-action@master
-      with:
-        args: deploy --stage green
+    - name: Deploy to Green
+      id: deploy_green
+      run: |
+        OUTPUT=$(npx serverless deploy --stage green)
+        echo "$OUTPUT"  # Optional: This line is just for debugging to see the output
+        URL_LAMBDA=$(npx sls output get --name ServiceEndpoint)
+        echo "::set-output name=url_lambda::$URL_LAMBDA"
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
 
-
     - name: Run Newman Tests
-      run: newman run tests/postman/Shortener.postman_collection.json --env-var "URL_LAMBDA=${{ steps.deploy_green.outputs.url_lambda }}"
+      run: newman run tests/postman/Shortener.postman_collection.json --env-var "URL_LAMBDA=${{ steps.deploy_green.outputs.url_lambda }}" --env-var "Environment=green"
 
   deploy_blue:
 
