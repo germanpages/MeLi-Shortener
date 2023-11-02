@@ -60,20 +60,10 @@ jobs:
         sam build --use-container
         sam deploy --no-fail-on-empty-changeset --stack-name dynamodb-stack
 
-    - name: Install Serverless Framework
-      run: npm install -g serverless
-
-    - name: Install Serverless plugins
-      run: |
-        serverless plugin install -n serverless-go-build
-        serverless plugin install -n serverless-scriptable-plugin
-
-    - name: Deploy to Green
-      id: deploy_green
-      run: |
-        OUTPUT=$(npx serverless deploy --stage green)
-        URL_LAMBDA=$(echo "$OUTPUT" | grep -oP 'https://[^/]*')
-        echo "::set-output name=url_lambda::$URL_LAMBDA"
+    - name: Serverless remove
+      uses: serverless/github-action@master
+      with:
+        args: deploy --stage green
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
@@ -102,7 +92,7 @@ jobs:
     - name: Serverless remove
       uses: serverless/github-action@master
       with:
-        args: remove --stage blue
+        args: deploy --stage blue
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
