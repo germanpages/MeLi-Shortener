@@ -121,6 +121,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+    
+    - name: Install Serverless Framework
+      run: npm install -g serverless
+
+    - name: Install Serverless plugins
+      run: |
+        serverless plugin install -n serverless-go-build
+        serverless plugin install -n serverless-scriptable-plugin
 
     - name: Remove Green Deployment
       run: npx serverless remove --stage green
