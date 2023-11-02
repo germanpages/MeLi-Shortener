@@ -53,19 +53,16 @@ jobs:
 
     - name: Deploy to Green
       id: deploy_green
-      run: npx serverless deploy --stage green
+      run: |
+        OUTPUT=$(npx serverless deploy --stage green)
+        URL_LAMBDA=$(echo "$OUTPUT" | grep -o 'https://[^ ]*')
+        echo "::set-output name=url_lambda::$URL_LAMBDA"
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
 
-    - name: Set URL_LAMBDA environment variable
-      id: set-var
-      run: |
-        URL_LAMBDA=$(echo "${{ steps.deploy_green.outputs.stdout }}" | grep -o 'https://[^ ]*')
-        echo "URL_LAMBDA=$URL_LAMBDA" >> $GITHUB_OUTPUT
-
     - name: Run Newman Tests
-      run: newman run tests/postman/Shortener.postman_collection.json --env-var "URL_LAMBDA=${{ steps.set-var.outputs.URL_LAMBDA }}"
+      run: newman run tests/postman/Shortener.postman_collection.json --env-var "URL_LAMBDA=${{ steps.deploy_green.outputs.url_lambda }}"
 
   deploy_blue:
     
