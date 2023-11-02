@@ -58,7 +58,7 @@ jobs:
     - name: Deploy cloudformation
       run: |
         sam build --use-container
-        sam deploy --no-fail-on-empty-changeset --stack-name dynamodb_stack
+        sam deploy --no-fail-on-empty-changeset --stack-name dynamodb-stack
 
     - name: Install Serverless Framework
       run: npm install -g serverless
