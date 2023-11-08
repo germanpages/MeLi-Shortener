@@ -57,4 +57,4 @@ jobs:
         echo "::set-output name=url_lambda::$url"
 
     - name: Run Newman Tests
-      run: newman run tests/postman/Shortener.postman_collection.json --env-var "URL_LAMBDA=${{ steps.deploy_green.outputs.url_lambda }}" --env-var "Environment=green"
+      run: newman run tests/postman/Shortener.postman_collection.json --env-var "URL_LAMBDA=${{ steps.deploy_green.outputs.url_lambda }}" --env-var "Environment=testing"
