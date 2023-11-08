@@ -42,7 +42,7 @@ jobs:
         sam deploy --no-fail-on-empty-changeset --stack-name dynamodb-stack
 
     - name: Deploy to testing
-      id: deploy_green
+      id: deploy_testing
       uses: serverless/github-action@v3.2
       with:
         args: -c "serverless plugin install --name serverless-go-build && serverless plugin install --name serverless-scriptable-plugin && serverless plugin install --name serverless-manifest-plugin && serverless deploy --stage testing --force"
@@ -57,4 +57,4 @@ jobs:
         echo "::set-output name=url_lambda::$url"
 
     - name: Run Newman Tests
-      run: newman run tests/postman/Shortener.postman_collection.json --env-var "URL_LAMBDA=${{ steps.deploy_green.outputs.url_lambda }}" --env-var "Environment=testing"
+      run: newman run tests/postman/Shortener.postman_collection.json --env-var "URL_LAMBDA=${{ steps.deploy_testing.outputs.url_lambda }}" --env-var "Environment=testing"
