@@ -1,0 +1,60 @@
+name: Build, Test, and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.21
+
+    - name: Build
+      run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/main src/main.go
+
+    - name: Setup AWS SAM command line interpreter
+      uses: aws-actions/setup-sam@v2
+      with:
+        use-installer: true
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+        aws-region: us-east-1
+
+    - name: Deploy cloudformation
+      run: |
+        sam build --use-container
+        sam deploy --no-fail-on-empty-changeset --stack-name dynamodb-stack
+
+    - name: Deploy to testing
+      id: deploy_testing
+      uses: serverless/github-action@v3.2
+      with:
+        args: -c "serverless plugin install --name serverless-go-build && serverless plugin install --name serverless-scriptable-plugin && serverless plugin install --name serverless-manifest-plugin && serverless deploy --stage testing --force"
+        entrypoint: /bin/bash
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+    - name: manifest
+      id: manifest
+      run: |
+        url=$(cat .serverless/manifest.json | jq -r '.prd.urls.apiGateway')
+        echo "::set-output name=url_lambda::$url"
+
+    - name: Run Newman Tests
+      run: newman run tests/postman/Shortener.postman_collection.json --env-var "URL_LAMBDA=${{ steps.deploy_testing.outputs.url_lambda }}" --env-var "Environment=testing"

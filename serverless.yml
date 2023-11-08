@@ -17,28 +17,6 @@ provider:
   role: arn:aws:iam::312953117411:role/Shortener
   environment:
     BASE_URL: https://me.li
-resources:
-  Resources:
-    UrlShortener:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: UrlShortener
-        AttributeDefinitions:
-          - AttributeName: shortUrl
-            AttributeType: S
-          - AttributeName: longUrl
-            AttributeType: S
-        KeySchema:
-          - AttributeName: shortUrl
-            KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
-        GlobalSecondaryIndexes:
-          - IndexName: LongUrlIndex
-            KeySchema:
-              - AttributeName: longUrl
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
 
 package:
   include:
