@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  set-environment:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,27 +22,8 @@ jobs:
         go-version: 1.21
 
     - name: Build
-      run: go build -v -o bin/main ./src/main.go
-      env:
-        GOROOT: /opt/hostedtoolcache/go/1.21.3/x64
-
-
-  deploy_green:
-    needs: set-environment
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: 1.21.3
-    
-    - name: Build
       run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/main src/main.go
-    
+
     - name: Setup AWS SAM command line interpreter
       uses: aws-actions/setup-sam@v2
       with:
@@ -60,11 +41,11 @@ jobs:
         sam build --use-container
         sam deploy --no-fail-on-empty-changeset --stack-name dynamodb-stack
 
-    - name: Deploy to Green
+    - name: Deploy to testing
       id: deploy_green
       uses: serverless/github-action@v3.2
       with:
-        args: -c "serverless plugin install --name serverless-go-build && serverless plugin install --name serverless-scriptable-plugin && serverless plugin install --name serverless-manifest-plugin && serverless deploy --stage green"
+        args: -c "serverless plugin install --name serverless-go-build && serverless plugin install --name serverless-scriptable-plugin && serverless plugin install --name serverless-manifest-plugin && serverless deploy --stage testing"
         entrypoint: /bin/bash
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
@@ -77,51 +58,3 @@ jobs:
 
     - name: Run Newman Tests
       run: newman run tests/postman/Shortener.postman_collection.json --env-var "URL_LAMBDA=${{ steps.deploy_green.outputs.url_lambda }}" --env-var "Environment=green"
-
-    - run: echo ${{ steps.manifest.outputs.url }}
-  deploy_blue:
-
-    needs: deploy_green
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: 1.21.3
-
-    - name: Build
-      run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/main src/main.go
-
-    - name: Install Serverless plugins
-      run: |
-        npx serverless plugin install --name serverless-go-build
-        npx serverless plugin install --name serverless-scriptable-plugin
-
-    - name: Serverless deploy
-      uses: serverless/github-action@master
-      with:
-        args: deploy --stage blue
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-
-  cleanup:
-    if: always()
-    needs: [deploy_green, deploy_blue]
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Serverless remove
-      uses: serverless/github-action@master
-      with:
-        args: remove --stage green
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
