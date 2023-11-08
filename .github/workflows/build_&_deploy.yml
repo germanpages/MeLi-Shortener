@@ -45,7 +45,7 @@ jobs:
       id: deploy_green
       uses: serverless/github-action@v3.2
       with:
-        args: -c "serverless plugin install --name serverless-go-build && serverless plugin install --name serverless-scriptable-plugin && serverless plugin install --name serverless-manifest-plugin && serverless deploy --stage testing"
+        args: -c "serverless plugin install --name serverless-go-build && serverless plugin install --name serverless-scriptable-plugin && serverless plugin install --name serverless-manifest-plugin && serverless deploy --stage testing --force"
         entrypoint: /bin/bash
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
